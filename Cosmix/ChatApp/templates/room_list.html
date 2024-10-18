@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid text-primary mt-5 pt-5">
+    <h1 class="mb-5 text-center"><strong>Chat Rooms</strong></h1>
+    <div class="row mb-5 px-5">
+        {% for room in rooms %}
+        <div class="col-lg-2 mb-3">
+            <div class="card h-100" style="width:100%; border:transparent;">
+                <img class="card-img-top" src="{% static 'img/chat_room_icon.png' %}" alt="{{ user.user.username }}"
+                    style="width:100%; border:transparent;; aspect-ratio: 1/1;">
+                <div class="card-body">
+                    <p class="card-text text-center">
+                        {{ room.name }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div> 
+</div>
+
+{% endblock %}

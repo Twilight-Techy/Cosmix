@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid text-primary mt-5 pt-5">
+    <h1 class="mb-5 text-center"><strong>Online Users</strong></h1>
+    <div class="row mb-5 px-5">
+        {% for user in users %}
+        {% if user.is_online %}
+        <div class="col-lg-2 mb-3">
+            <a href="{% url 'private_chat' user.user.username %}">
+                <div class="card h-100" style="width:100%; border:transparent;">
+                    <img class="card-img-top rounded-pill" src="{% if user.picture %} {{ user.picture.url }} {% else %} {% static 'img/user_icon.png' %} {% endif %}" alt="{{ user.user.username }}"
+                        style="width:100%; border:transparent;; aspect-ratio: 1/1;">
+                    <div class="card-body">
+                        <p class="card-text text-center">
+                            {{ user.user.username }}
+                            <span class="badge bg-success rounded-pill">.</span>
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div> 
+    <h1 class="mb-5 text-center"><strong>Offline Users</strong></h1>
+    <div class="row mb-5 px-5">
+        {% for user in users %}
+        {% if not user.is_online %}
+        <div class="col-lg-2 mb-5">
+            <a href="{% url 'private_chat' user.user.username %}">
+                <div class="card h-100" style="width:100%; border:transparent;">
+                    <img class="card-img-top rounded-pill" src="{% if user.picture %} {{ user.picture.url }} {% else %} {% static 'img/user_icon.png' %} {% endif %}" alt="{{ user.user.username }}"
+                        style="width:100%; border:transparent;; aspect-ratio: 1/1;">
+                    <div class="card-body">
+                        <p class="card-text text-center">
+                            {{ user.user.username }}
+                            <span class="badge bg-secondary rounded-pill">.</span>
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div> 
+</div>
+
+{% endblock %}

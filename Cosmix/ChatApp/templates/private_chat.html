@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid text-primary mt-5 pt-5">
+    <h1 id="header" class="mb-5 text-center"><strong>{% if user2 != request.user %} {{ private_chat.user2.username }}'s Chat {% elif user2 == request.user %} {{ private_chat.user1.username }}'s Chat {% endif %}</strong></h1>
+    <div class="row mb-5 px-auto">
+        <div class="col-lg-7 py-3 mb-3 mx-auto border" style="min-height: 50vh;">
+            <div id="chat-messages">
+                {% for message in messages %}
+                {% if message.sender != request.user %}
+                <div class=" d-flex">
+                    <img src="{% if message.sender.userprofile.picture %} {{ message.sender.userprofile.picture.url }} {% else %} {% static 'img/user_icon.png' %} {% endif %}" alt="{{ message.sender.username }}" style="width:50px; height: 50px;"
+                        class="img-fluid rounded-pill mt-3 ms-3">
+                    <div class="card ms-3 mt-3 p-3" style="width:50%">
+                        <p>{{ message.content }}</p>
+                        <p class="text-end"><sub>{{ message.timestamp|date:"H:i" }}</sub></p>
+                    </div>
+                </div>
+                {% elif message.sender == request.user %}
+                <div class="d-flex flex-row-reverse">
+                    <img src="{% if message.sender.userprofile.picture %} {{ message.sender.userprofile.picture.url }} {% else %} {% static 'img/user_icon.png' %} {% endif %}" alt="{{ message.sender.username }}" style="width:50px; height: 50px;"
+                        class="img-fluid rounded-pill mt-3 me-3 float-end">
+                    <div class="card me-3 mt-3 p-3 bg-primary float-end" style="width:50%">
+                        <p>{{ message.content }}</p>
+                        <p class="text-end"><sub>{{ message.timestamp|date:"H:i" }}</sub></p>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% if user2 != request.user %}
+            <!-- <form id ="message-form" method="post" action="{% url 'send_private_message' user2.username %}" -->
+            <form id ="message-form"
+                class="col-9 mx-auto mt-5 mb-3 d-flex flex-row justify-content-center">
+            {% elif user2 == request.user %}
+            <!-- <form id="message-form" method="post" action="{% url 'send_private_message' user1.username %}" -->
+            <form id="message-form"
+                class="col-9 mx-auto mt-5 mb-5 d-flex flex-row justify-content-center">
+                {% endif %}
+                {% csrf_token %}
+                <input type="text" id="message-input" name="message" class="form-control me-3 flex-grow-1" style="width: 100%;"
+                    placeholder="Enter text here">
+                <button type="submit" class="btn btn-primary float-end">Send</button>
+            </form>
+        </div>
+    </div> 
+</div>
+
+<!-- {% if user2 != request.user %}
+<script>
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host.replace(':8000', ':8001') + '/ws/private/' + '{{ user2.username }}' + '/');
+
+    document.querySelector('#message-form').onsubmit = function(e) {
+        e.preventDefault();  // Prevent the form from submitting the traditional way
+        const messageInputDom = document.querySelector('#message-input');
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+        messageInputDom.value = '';
+    };
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        // Handle incoming messages and update the chat interface
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('d-flex');
+        if (data.sender == "{{ request.user.username }}") {
+            messageElement.classList.add('flex-row-reverse');
+            messageElement.innerHTML = `
+                <img src="${data.picture_url}" alt="${data.sender}" style="width:50px; height: 50px;"
+                        class="img-fluid rounded-pill mt-3 me-3 float-end">
+                    <div class="card me-3 mt-3 p-3 bg-primary float-end" style="width:50%">
+                        <p>${data.message}</p>
+                        <p class="text-end"><sub>${data.timestamp}</sub></p>
+                    </div>`;
+        } else {
+            messageElement.innerHTML = `
+                <img src="${data.picture_url}" alt="${data.sender}" style="width:50px; height: 50px;"
+                        class="img-fluid rounded-pill mt-3 ms-3">
+                    <div class="card ms-3 mt-3 p-3" style="width:50%">
+                        <p>${data.message}</p>
+                        <p class="text-end"><sub>${data.timestamp}</sub></p>
+                    </div>`;
+        }
+        document.getElementById('chat-messages').appendChild(messageElement);
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+</script>
+
+{% elif user2 == request.user %}
+<script>
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host.replace(':8000', ':8001') + '/ws/private/' + '{{ user1.username }}' + '/');
+
+    document.querySelector('#message-form').onsubmit = function(e) {
+        e.preventDefault();  // Prevent the form from submitting the traditional way
+        const messageInputDom = document.querySelector('#message-input');
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+        messageInputDom.value = '';
+    };
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        // Handle incoming messages and update the chat interface
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('d-flex');
+        if (data.sender == "{{ request.user.username }}") {
+            messageElement.classList.add('flex-row-reverse');
+            messageElement.innerHTML = `
+                <img src="${data.picture_url}" alt="${data.sender}" style="width:50px; height: 50px;"
+                        class="img-fluid rounded-pill mt-3 me-3 float-end">
+                    <div class="card me-3 mt-3 p-3 bg-primary float-end" style="width:50%">
+                        <p>${data.message}</p>
+                        <p class="text-end"><sub>${data.timestamp}</sub></p>
+                    </div>`;
+        } else {
+            messageElement.innerHTML = `
+                <img src="${data.picture_url}" alt="${data.sender}" style="width:50px; height: 50px;"
+                        class="img-fluid rounded-pill mt-3 ms-3">
+                    <div class="card ms-3 mt-3 p-3" style="width:50%">
+                        <p>${data.message}</p>
+                        <p class="text-end"><sub>${data.timestamp}</sub></p>
+                    </div>`;
+        }
+        document.getElementById('chat-messages').appendChild(messageElement);
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+</script>
+{% endif %} -->
+
+<script>
+    const socket = new WebSocket('ws://' + window.location.host.replace(':8000', ':8001') + '/ws/private/' + '{{ user2.username }}' + '/');
+
+    // Open connection
+    socket.onopen = function(event) {
+        console.log('Connected to the WebSocket server');
+        socket.send('Hello Server!');
+    };
+
+    // Receive messages
+    socket.onmessage = function(event) {
+        console.log('Received:', event.data);
+    };
+
+    // Handle errors
+    socket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+    };
+
+    // Close connection
+    socket.onclose = function(event) {
+        console.log('Disconnected from the WebSocket server');
+    };
+</script>
+
+
+{% endblock %}
